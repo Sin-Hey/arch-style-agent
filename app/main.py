@@ -4,14 +4,20 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from app.agents.orchestrator import ArchitectureAssistantOrchestrator
 from app.schemas import AnalyzeResponse, RecommendResponse, RequirementRequest
-from app.services.knowledge_base import load_architecture_styles, load_course_knowledge, load_test_cases
+from app.services.knowledge_base import (
+    build_knowledge_graph,
+    load_architecture_styles,
+    load_course_knowledge,
+    load_test_cases,
+)
 from app.services.llm import LLMConfigurationError, LLMServiceError
+from app.services.llm_cache import LLMCache
 
 
 app = FastAPI(
@@ -48,6 +54,17 @@ async def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> Response:
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+        '<rect width="64" height="64" rx="14" fill="#2563eb"/>'
+        '<path d="M22 46 32 16l10 30h-7l-2-7h-8l-2 7h-7Zm5-13h10l-5-15-5 15Z" fill="#fff"/>'
+        "</svg>"
+    )
+    return Response(content=svg, media_type="image/svg+xml")
+
+
 @app.get("/api/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -66,6 +83,16 @@ async def examples() -> list[dict]:
 @app.get("/api/course-knowledge")
 async def course_knowledge() -> dict:
     return load_course_knowledge()
+
+
+@app.get("/api/knowledge-graph")
+async def knowledge_graph() -> dict:
+    return build_knowledge_graph()
+
+
+@app.get("/api/cache/stats")
+async def cache_stats() -> dict:
+    return LLMCache().stats()
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)

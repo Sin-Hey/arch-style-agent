@@ -54,6 +54,9 @@ class EvaluationReport(BaseModel):
     disadvantages: list[str]
     risk_mitigation: list[str]
     decision_trace: list[str]
+    hybrid_recommendation: str = ""
+    quality_tradeoffs: list[str] = Field(default_factory=list)
+    refactoring_plan: list[str] = Field(default_factory=list)
 
 
 class AnalyzeResponse(BaseModel):

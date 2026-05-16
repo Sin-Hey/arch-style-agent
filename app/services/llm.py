@@ -7,6 +7,8 @@ from typing import Any
 
 import httpx
 
+from app.services.llm_cache import LLMCache
+
 
 class LLMConfigurationError(RuntimeError):
     """Raised when required LLM settings are missing or invalid."""
@@ -21,6 +23,7 @@ class DeepSeekClient:
         self.api_key = _clean_env_value(os.getenv("DEEPSEEK_API_KEY", ""))
         self.base_url = _clean_env_value(os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")).rstrip("/")
         self.model = _clean_env_value(os.getenv("DEEPSEEK_MODEL", "deepseek-chat"))
+        self.cache = LLMCache()
 
     def _ensure_configured(self) -> None:
         if not self.api_key:
@@ -51,6 +54,16 @@ class DeepSeekClient:
             "Content-Type": "application/json",
         }
         url = f"{self.base_url}/chat/completions"
+        cache_key = self.cache.build_key(
+            provider="deepseek",
+            model=self.model,
+            base_url=self.base_url,
+            messages=messages,
+            temperature=temperature,
+        )
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
         try:
             async with httpx.AsyncClient(timeout=45, trust_env=False) as client:
                 response = await client.post(url, json=payload, headers=headers)
@@ -62,9 +75,20 @@ class DeepSeekClient:
             raise LLMServiceError(f"LLM API request failed: {exc}") from exc
 
         try:
-            return body["choices"][0]["message"]["content"]
+            content = body["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
             raise LLMServiceError(f"LLM API response shape is invalid: {body}") from exc
+        self.cache.set(
+            cache_key,
+            content,
+            {
+                "provider": "deepseek",
+                "model": self.model,
+                "base_url": self.base_url,
+                "temperature": temperature,
+            },
+        )
+        return content
 
     async def chat_json(self, messages: list[dict[str, str]], temperature: float = 0.1) -> dict[str, Any]:
         text = await self.chat_text(messages, temperature=temperature)

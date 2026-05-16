@@ -16,11 +16,17 @@ def test_static_data_endpoints() -> None:
 
     styles = client.get("/api/styles")
     examples = client.get("/api/examples")
+    graph = client.get("/api/knowledge-graph")
+    cache = client.get("/api/cache/stats")
 
     assert styles.status_code == 200
     assert examples.status_code == 200
+    assert graph.status_code == 200
+    assert cache.status_code == 200
     assert len(styles.json()) >= 10
     assert len(examples.json()) >= 20
+    assert graph.json()["nodes"]
+    assert graph.json()["edges"]
 
 
 def test_recommend_returns_three_candidates(monkeypatch: pytest.MonkeyPatch) -> None:

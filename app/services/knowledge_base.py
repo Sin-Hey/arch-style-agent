@@ -25,3 +25,49 @@ def load_test_cases() -> list[dict[str, Any]]:
 def load_course_knowledge() -> dict[str, Any]:
     path = DATA_DIR / "course_knowledge.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_knowledge_graph() -> dict[str, list[dict[str, Any]]]:
+    nodes: list[dict[str, Any]] = []
+    edges: list[dict[str, Any]] = []
+    seen_nodes: set[str] = set()
+
+    def add_node(node_id: str, label: str, node_type: str, **extra: Any) -> None:
+        if node_id in seen_nodes:
+            return
+        seen_nodes.add(node_id)
+        nodes.append({"id": node_id, "label": label, "type": node_type, **extra})
+
+    for style in load_architecture_styles():
+        style_id = f"style:{style['id']}"
+        add_node(style_id, style["name"], "architecture_style")
+        for scenario in style.get("applicable_scenarios", []):
+            scenario_id = f"scenario:{scenario}"
+            add_node(scenario_id, scenario, "scenario")
+            edges.append({"source": style_id, "target": scenario_id, "relation": "applies_to"})
+        for keyword in style.get("matching_keywords", []):
+            keyword_id = f"keyword:{keyword}"
+            add_node(keyword_id, keyword, "keyword")
+            edges.append({"source": keyword_id, "target": style_id, "relation": "matches"})
+        for dimension, score in style.get("quality_scores", {}).items():
+            quality_id = f"quality:{dimension}"
+            add_node(quality_id, dimension, "quality_attribute")
+            edges.append(
+                {
+                    "source": style_id,
+                    "target": quality_id,
+                    "relation": "has_quality_score",
+                    "score": score,
+                }
+            )
+
+    course = load_course_knowledge()
+    for style_name, course_terms in course.get("style_mapping", {}).items():
+        course_style_id = f"course_style:{style_name}"
+        add_node(course_style_id, style_name, "course_style")
+        for term in course_terms:
+            term_id = f"course_term:{term}"
+            add_node(term_id, term, "course_term")
+            edges.append({"source": course_style_id, "target": term_id, "relation": "explained_by"})
+
+    return {"nodes": nodes, "edges": edges}

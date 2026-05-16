@@ -550,6 +550,20 @@
         <h3>决策溯源</h3>
         <div id="traceList"></div>
       </div>
+      <div class="content-grid">
+        <div class="callout">
+          <h3>组合架构方案</h3>
+          <div id="hybridPlan"></div>
+        </div>
+        <div class="callout">
+          <h3>质量属性权衡</h3>
+          <div id="tradeoffList"></div>
+        </div>
+      </div>
+      <div class="callout">
+        <h3>架构重构建议</h3>
+        <div id="refactorList"></div>
+      </div>
     </section>
 
     <section class="panel" id="featuresSection" hidden>
@@ -719,6 +733,9 @@
         $("reasonList").innerHTML = list(data.final_report.recommendation_reason);
         $("riskList").innerHTML = list(data.final_report.risk_mitigation);
         $("traceList").innerHTML = list(data.final_report.decision_trace);
+        $("hybridPlan").textContent = data.final_report.hybrid_recommendation || "当前需求可采用单一主架构，无需额外组合。";
+        $("tradeoffList").innerHTML = list(data.final_report.quality_tradeoffs || []);
+        $("refactorList").innerHTML = list(data.final_report.refactoring_plan || []);
         $("metrics").innerHTML = renderMetrics(data.features);
         $("featureChips").innerHTML = renderFeatureChips(data.features);
         $("featuresRaw").textContent = JSON.stringify(data.features, null, 2);
