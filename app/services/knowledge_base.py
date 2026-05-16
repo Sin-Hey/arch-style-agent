@@ -19,3 +19,9 @@ def load_architecture_styles() -> list[dict[str, Any]]:
 def load_test_cases() -> list[dict[str, Any]]:
     path = DATA_DIR / "test_cases.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def load_course_knowledge() -> dict[str, Any]:
+    path = DATA_DIR / "course_knowledge.json"
+    return json.loads(path.read_text(encoding="utf-8"))

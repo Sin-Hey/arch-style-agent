@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from app.agents.orchestrator import ArchitectureAssistantOrchestrator
 from app.schemas import AnalyzeResponse, RecommendResponse, RequirementRequest
-from app.services.knowledge_base import load_architecture_styles, load_test_cases
+from app.services.knowledge_base import load_architecture_styles, load_course_knowledge, load_test_cases
 from app.services.llm import LLMConfigurationError, LLMServiceError
 
 
@@ -61,6 +61,11 @@ async def styles() -> list[dict]:
 @app.get("/api/examples")
 async def examples() -> list[dict]:
     return load_test_cases()
+
+
+@app.get("/api/course-knowledge")
+async def course_knowledge() -> dict:
+    return load_course_knowledge()
 
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)

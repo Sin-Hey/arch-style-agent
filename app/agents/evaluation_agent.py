@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from app.schemas import ArchitectureCandidate, EvaluationReport, RequirementFeatures
+from app.services.knowledge_base import load_course_knowledge
 from app.services.llm import DeepSeekClient
 
 
@@ -17,6 +18,8 @@ class EvaluationGenerationAgent:
         candidates: list[ArchitectureCandidate],
     ) -> EvaluationReport:
         features_json = json.dumps(features.model_dump(), ensure_ascii=False)
+        course_knowledge = load_course_knowledge()
+        course_summary = json.dumps(course_knowledge["prompt_summary"], ensure_ascii=False)
         candidate_summary = [
             {
                 "name": item.name,
@@ -58,6 +61,9 @@ class EvaluationGenerationAgent:
 
 候选架构：
 {candidate_summary}
+
+课程知识库摘要：
+{course_summary}
 """.strip(),
             },
         ]
