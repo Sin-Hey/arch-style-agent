@@ -6,70 +6,148 @@
   <title>软件架构风格智能助手</title>
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-    mermaid.initialize({ startOnLoad: false, theme: "default" });
+    mermaid.initialize({ startOnLoad: false, theme: "default", securityLevel: "loose" });
     window.renderMermaid = async () => {
-      const blocks = document.querySelectorAll(".mermaid");
+      const blocks = document.querySelectorAll(".mermaid[data-rendered='false']");
       for (const block of blocks) {
         const code = block.textContent;
         const id = `m-${Math.random().toString(36).slice(2)}`;
         const { svg } = await mermaid.render(id, code);
         block.innerHTML = svg;
+        block.dataset.rendered = "true";
       }
     };
   </script>
   <style>
     :root {
       color-scheme: light;
-      --ink: #1b2430;
-      --muted: #657083;
-      --line: #d8dee8;
+      --bg: #f3f6fb;
       --panel: #ffffff;
-      --bg: #f5f7fb;
-      --primary: #1f6feb;
+      --panel-soft: #f8fafc;
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #dbe3ef;
+      --line-strong: #c5d0df;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
       --accent: #0f766e;
+      --accent-soft: #e7f7f4;
       --warn: #b45309;
+      --danger: #b91c1c;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
+      font-size: 15px;
     }
+
     header {
-      background: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, .94);
       border-bottom: 1px solid var(--line);
-      padding: 18px 28px;
+      backdrop-filter: blur(10px);
+    }
+
+    .bar {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 18px;
     }
-    h1 { font-size: 22px; margin: 0; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2563eb, #0f766e);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
     main {
-      max-width: 1180px;
+      max-width: 1380px;
       margin: 0 auto;
       padding: 24px;
       display: grid;
       gap: 18px;
     }
-    section {
+
+    .panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 18px;
+      box-shadow: var(--shadow);
     }
-    h2 { font-size: 17px; margin: 0 0 12px; }
+
+    .panel-inner { padding: 18px; }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    h2, h3 {
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    h2 { font-size: 17px; }
+    h3 { font-size: 15px; }
+
     textarea {
       width: 100%;
-      min-height: 130px;
+      min-height: 150px;
       resize: vertical;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 13px 14px;
+      margin-top: 12px;
       font: inherit;
-      line-height: 1.6;
+      line-height: 1.7;
+      color: var(--ink);
+      background: #fff;
     }
+
+    textarea:focus, select:focus, button:focus {
+      outline: 3px solid rgba(37, 99, 235, .18);
+      border-color: var(--primary);
+    }
+
     .actions {
       display: flex;
       align-items: center;
@@ -77,109 +155,434 @@
       margin-top: 12px;
       flex-wrap: wrap;
     }
+
     button, select {
-      border: 1px solid var(--line);
-      background: #ffffff;
-      border-radius: 6px;
-      min-height: 38px;
-      padding: 0 12px;
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
       font: inherit;
+      padding: 0 13px;
     }
+
+    select { min-width: 260px; }
+
     button.primary {
-      background: var(--primary);
-      color: #ffffff;
       border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
       cursor: pointer;
+      font-weight: 700;
     }
-    button:disabled { opacity: .62; cursor: wait; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    button.primary:hover { background: var(--primary-dark); }
+    button:disabled { opacity: .65; cursor: wait; }
+
+    .status {
+      color: var(--muted);
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--accent); }
+
+    .side {
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       gap: 14px;
     }
-    .candidate {
+
+    .mini-title {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 8px;
+      align-items: start;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .num {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #e8efff;
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .summary {
+      border-left: 4px solid var(--primary);
+      padding: 20px 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .summary-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .recommendation {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 5px;
+      letter-spacing: 0;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .callout {
+      background: var(--panel-soft);
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 14px;
-      background: #fbfcff;
     }
-    .score { color: var(--accent); font-weight: 700; }
-    .muted { color: var(--muted); }
-    .warn { color: var(--warn); }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      overflow-x: auto;
-      display: block;
+
+    .callout h3 {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-weight: 700;
     }
-    th, td {
-      border: 1px solid var(--line);
-      padding: 8px 10px;
-      text-align: left;
-      white-space: nowrap;
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      line-height: 1.7;
     }
-    th { background: #eef3fb; }
-    pre {
-      background: #0f172a;
-      color: #e5e7eb;
-      border-radius: 8px;
-      padding: 14px;
-      overflow: auto;
-      white-space: pre-wrap;
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
     }
-    .mermaid {
-      background: #ffffff;
+
+    .metric {
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 12px;
-      overflow: auto;
+      background: #fff;
     }
-    @media (max-width: 860px) {
-      header { align-items: flex-start; flex-direction: column; }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .metric strong {
+      font-size: 22px;
+      color: var(--primary);
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .candidate {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 15px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .candidate .score {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .scorebar {
+      height: 8px;
+      background: #e5eaf2;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .scorebar span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #0f766e, #2563eb);
+      width: var(--w);
+    }
+
+    .two-col-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      color: #334155;
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      background: #fff;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    th {
+      background: #eef4ff;
+      color: #334155;
+      font-weight: 800;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .topology-list {
+      display: grid;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .diagram {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 14px;
+      overflow-x: auto;
+    }
+
+    .diagram h3 { margin-bottom: 10px; }
+
+    .mermaid {
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    pre {
+      margin: 0;
+      max-height: 360px;
+      overflow: auto;
+      padding: 14px;
+      background: #111827;
+      color: #e5e7eb;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 980px) {
+      .input-grid, .content-grid, .candidate-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      select { min-width: 100%; }
+      .bar { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (max-width: 560px) {
       main { padding: 14px; }
-      .grid { grid-template-columns: 1fr; }
+      .panel-inner, .summary { padding: 15px; }
+      .metrics, .two-col-list { grid-template-columns: 1fr; }
+      .recommendation { font-size: 22px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>软件架构风格智能助手</h1>
-    <span class="muted">LLM + Agent + 规则引擎</span>
+    <div class="bar">
+      <div class="brand">
+        <div class="mark">A</div>
+        <div>
+          <h1>软件架构风格智能助手</h1>
+          <div class="subtitle">需求理解 · 架构推荐 · 决策溯源</div>
+        </div>
+      </div>
+      <div class="badge-row">
+        <span class="badge">LLM</span>
+        <span class="badge">Agent</span>
+        <span class="badge">规则引擎</span>
+      </div>
+    </div>
   </header>
+
   <main>
-    <section>
-      <h2>需求输入</h2>
-      <textarea id="requirement">开发一个跨平台的即时通讯系统，要求支持万人同时在线，需要保证消息的实时性和可靠性，后期可能需要快速扩展视频通话功能。</textarea>
-      <div class="actions">
-        <button class="primary" id="recommendBtn">生成架构推荐</button>
-        <select id="examples"></select>
-        <span id="status" class="muted"></span>
+    <section class="panel">
+      <div class="panel-inner input-grid">
+        <div>
+          <h2>需求输入</h2>
+          <textarea id="requirement">开发一个跨平台的即时通讯系统，要求支持万人同时在线，需要保证消息的实时性和可靠性，后期可能需要快速扩展视频通话功能。</textarea>
+          <div class="actions">
+            <button class="primary" id="recommendBtn">生成架构推荐</button>
+            <select id="examples"></select>
+            <span id="status" class="status"></span>
+          </div>
+        </div>
+        <aside class="side">
+          <div>
+            <div class="mini-title">推荐流程</div>
+            <ol class="steps">
+              <li><span class="num">1</span><span>需求解析 Agent 提取质量属性和约束。</span></li>
+              <li><span class="num">2</span><span>规则引擎对知识库架构进行多维评分。</span></li>
+              <li><span class="num">3</span><span>评估 Agent 生成最终推荐和风险应对。</span></li>
+            </ol>
+          </div>
+          <div class="mini-title">内置 11 种架构风格，20 条演示案例。</div>
+        </aside>
       </div>
     </section>
 
-    <section id="reportSection" hidden>
-      <h2>最终推荐</h2>
-      <div id="finalReport"></div>
+    <section class="panel summary" id="reportSection" hidden>
+      <div class="summary-head">
+        <div>
+          <div class="mini-title">最终推荐</div>
+          <div class="recommendation" id="finalName"></div>
+        </div>
+        <div class="badge-row" id="summaryBadges"></div>
+      </div>
+      <div class="content-grid">
+        <div class="callout">
+          <h3>推荐理由</h3>
+          <div id="reasonList"></div>
+        </div>
+        <div class="callout">
+          <h3>风险应对</h3>
+          <div id="riskList"></div>
+        </div>
+      </div>
+      <div class="callout">
+        <h3>决策溯源</h3>
+        <div id="traceList"></div>
+      </div>
     </section>
 
-    <section id="featuresSection" hidden>
-      <h2>需求特征</h2>
-      <pre id="features"></pre>
+    <section class="panel" id="featuresSection" hidden>
+      <div class="panel-inner">
+        <h2>需求特征</h2>
+        <div class="metrics" id="metrics"></div>
+        <div class="chips" id="featureChips"></div>
+        <details>
+          <summary>查看结构化需求 JSON</summary>
+          <pre id="featuresRaw"></pre>
+        </details>
+      </div>
     </section>
 
-    <section id="candidatesSection" hidden>
-      <h2>候选架构 Top 3</h2>
-      <div id="candidates" class="grid"></div>
+    <section class="panel" id="candidatesSection" hidden>
+      <div class="panel-inner">
+        <h2>候选架构 Top 3</h2>
+        <div id="candidates" class="candidate-grid"></div>
+      </div>
     </section>
 
-    <section id="matrixSection" hidden>
-      <h2>对比矩阵</h2>
-      <div id="matrix"></div>
+    <section class="panel" id="matrixSection" hidden>
+      <div class="panel-inner">
+        <h2>对比矩阵</h2>
+        <div id="matrix" class="table-wrap"></div>
+      </div>
     </section>
 
-    <section id="topologySection" hidden>
-      <h2>架构拓扑图</h2>
-      <div id="topology"></div>
+    <section class="panel" id="topologySection" hidden>
+      <div class="panel-inner">
+        <h2>架构拓扑图</h2>
+        <div id="topology" class="topology-list"></div>
+      </div>
     </section>
   </main>
 
@@ -189,9 +592,20 @@
     const button = $("recommendBtn");
     const examples = $("examples");
 
+    const metricMap = [
+      ["concurrency", "高并发"],
+      ["realtime", "实时性"],
+      ["reliability", "可靠性"],
+      ["scalability", "扩展性"],
+      ["deployment_complexity", "部署复杂度"],
+      ["data_consistency", "数据一致性"],
+      ["team_collaboration", "团队协作"],
+      ["maintainability", "可维护性"]
+    ];
+
     async function loadExamples() {
       const rows = await fetch("/api/examples").then((r) => r.json());
-      examples.innerHTML = rows.map((item) => `<option value="${item.id}">${item.id}. ${item.title}</option>`).join("");
+      examples.innerHTML = rows.map((item) => `<option value="${item.id}">${item.id}. ${escapeHtml(item.title)}</option>`).join("");
       examples.addEventListener("change", () => {
         const item = rows.find((row) => String(row.id) === examples.value);
         if (item) $("requirement").value = item.requirement;
@@ -199,11 +613,12 @@
     }
 
     function list(items) {
-      return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+      const safeItems = Array.isArray(items) ? items : [];
+      return `<ul>${safeItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
     }
 
     function escapeHtml(value) {
-      return String(value)
+      return String(value ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -213,11 +628,70 @@
     function renderMatrix(rows) {
       if (!rows.length) return "";
       const keys = Object.keys(rows[0]);
-      return `<table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${keys.map((k) => `<td>${row[k]}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+      return `<table><thead><tr>${keys.map((k) => `<th>${escapeHtml(k)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${keys.map((k) => `<td>${escapeHtml(row[k])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+
+    function renderMetrics(features) {
+      return metricMap.map(([key, label]) => `
+        <div class="metric">
+          <span>${label}</span>
+          <strong>${features[key] ?? 0}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderFeatureChips(features) {
+      const values = [
+        `领域：${features.domain || "未识别"}`,
+        `数据流：${features.data_flow || "未明确"}`,
+        ...((features.core_functions || []).map((item) => `功能：${item}`)),
+        ...((features.quality_attributes || []).map((item) => `质量：${item}`)),
+        ...((features.deployment_constraints || []).map((item) => `约束：${item}`))
+      ];
+      return values.map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("");
+    }
+
+    function renderCandidates(candidates) {
+      return candidates.map((item, index) => `
+        <article class="candidate">
+          <div class="summary-head">
+            <h3>${index + 1}. ${escapeHtml(item.name)}</h3>
+            <span class="badge">${escapeHtml(item.suitability)}</span>
+          </div>
+          <div class="score">${item.total_score} / 100</div>
+          <div class="scorebar" style="--w:${Math.max(0, Math.min(100, item.total_score))}%"><span></span></div>
+          <div class="two-col-list">
+            <div>
+              <div class="mini-title">优点</div>
+              ${list(item.advantages)}
+            </div>
+            <div>
+              <div class="mini-title">缺点</div>
+              ${list(item.disadvantages)}
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderTopology(candidates) {
+      return candidates.map((item) => `
+        <div class="diagram">
+          <h3>${escapeHtml(item.name)}</h3>
+          <div class="mermaid" data-rendered="false">${escapeHtml(item.mermaid)}</div>
+        </div>
+      `).join("");
+    }
+
+    function showSections() {
+      ["reportSection", "featuresSection", "candidatesSection", "matrixSection", "topologySection"].forEach((id) => {
+        $(id).hidden = false;
+      });
     }
 
     async function recommend() {
       button.disabled = true;
+      status.className = "status";
       status.textContent = "正在调用 LLM 并生成推荐...";
       try {
         const response = await fetch("/api/recommend", {
@@ -225,39 +699,39 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ requirement: $("requirement").value })
         });
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error(responseText || `HTTP ${response.status}`);
+        }
         if (!response.ok) throw new Error(data.detail || "请求失败");
 
-        $("reportSection").hidden = false;
-        $("featuresSection").hidden = false;
-        $("candidatesSection").hidden = false;
-        $("matrixSection").hidden = false;
-        $("topologySection").hidden = false;
-
-        $("finalReport").innerHTML = `
-          <p><strong>${escapeHtml(data.final_report.final_recommendation)}</strong></p>
-          <p class="muted">推荐理由</p>${list(data.final_report.recommendation_reason)}
-          <p class="muted">风险应对</p>${list(data.final_report.risk_mitigation)}
-          <p class="muted">决策溯源</p>${list(data.final_report.decision_trace)}
+        showSections();
+        const top = data.candidates[0];
+        $("finalName").textContent = data.final_report.final_recommendation;
+        $("summaryBadges").innerHTML = `
+          <span class="badge">Top 1：${escapeHtml(top.name)}</span>
+          <span class="badge">评分：${top.total_score}</span>
+          <span class="badge">${escapeHtml(top.suitability)}</span>
         `;
-        $("features").textContent = JSON.stringify(data.features, null, 2);
-        $("candidates").innerHTML = data.candidates.map((item) => `
-          <article class="candidate">
-            <h3>${escapeHtml(item.name)}</h3>
-            <p class="score">${item.total_score} / 100 · ${escapeHtml(item.suitability)}</p>
-            <p class="muted">优点</p>${list(item.advantages)}
-            <p class="muted">缺点</p>${list(item.disadvantages)}
-          </article>
-        `).join("");
+        $("reasonList").innerHTML = list(data.final_report.recommendation_reason);
+        $("riskList").innerHTML = list(data.final_report.risk_mitigation);
+        $("traceList").innerHTML = list(data.final_report.decision_trace);
+        $("metrics").innerHTML = renderMetrics(data.features);
+        $("featureChips").innerHTML = renderFeatureChips(data.features);
+        $("featuresRaw").textContent = JSON.stringify(data.features, null, 2);
+        $("candidates").innerHTML = renderCandidates(data.candidates);
         $("matrix").innerHTML = renderMatrix(data.comparison_matrix);
-        $("topology").innerHTML = data.candidates.map((item) => `
-          <h3>${escapeHtml(item.name)}</h3>
-          <pre class="mermaid">${escapeHtml(item.mermaid)}</pre>
-        `).join("");
+        $("topology").innerHTML = renderTopology(data.candidates);
         await window.renderMermaid();
+        status.className = "status ok";
         status.textContent = "推荐完成";
+        $("reportSection").scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (error) {
-        status.innerHTML = `<span class="warn">${escapeHtml(error.message)}</span>`;
+        status.className = "status error";
+        status.textContent = error.message;
       } finally {
         button.disabled = false;
       }

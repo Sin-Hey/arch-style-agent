@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 
 from app.agents.orchestrator import ArchitectureAssistantOrchestrator
 from app.schemas import AnalyzeResponse, RecommendResponse, RequirementRequest
@@ -37,6 +38,11 @@ def get_orchestrator() -> ArchitectureAssistantOrchestrator:
     return ArchitectureAssistantOrchestrator()
 
 
+def safe_error_detail(exc: Exception) -> str:
+    text = f"{type(exc).__name__}: {exc}"
+    return text.encode("ascii", errors="backslashreplace").decode("ascii")
+
+
 @app.get("/")
 async def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
@@ -65,6 +71,10 @@ async def analyze(request: RequirementRequest) -> AnalyzeResponse:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except LLMServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except ValidationError as exc:
+        raise HTTPException(status_code=502, detail=f"LLM response schema validation failed: {exc}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {safe_error_detail(exc)}") from exc
 
 
 @app.post("/api/recommend", response_model=RecommendResponse)
@@ -75,3 +85,7 @@ async def recommend(request: RequirementRequest) -> RecommendResponse:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except LLMServiceError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except ValidationError as exc:
+        raise HTTPException(status_code=502, detail=f"LLM response schema validation failed: {exc}") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {safe_error_detail(exc)}") from exc

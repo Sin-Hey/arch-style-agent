@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from app.schemas import ArchitectureCandidate, EvaluationReport, RequirementFeatures
 from app.services.llm import DeepSeekClient
 
@@ -14,6 +16,7 @@ class EvaluationGenerationAgent:
         features: RequirementFeatures,
         candidates: list[ArchitectureCandidate],
     ) -> EvaluationReport:
+        features_json = json.dumps(features.model_dump(), ensure_ascii=False)
         candidate_summary = [
             {
                 "name": item.name,
@@ -51,7 +54,7 @@ class EvaluationGenerationAgent:
 {requirement}
 
 需求特征：
-{features.model_dump_json(ensure_ascii=False)}
+{features_json}
 
 候选架构：
 {candidate_summary}
