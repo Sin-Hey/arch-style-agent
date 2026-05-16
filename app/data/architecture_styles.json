@@ -1,0 +1,357 @@
+[
+  {
+    "id": "layered",
+    "name": "分层架构",
+    "matching_keywords": ["企业管理", "后台", "业务流程", "CRUD", "维护"],
+    "applicable_scenarios": ["企业信息系统", "业务规则清晰的后台系统", "中小规模管理平台"],
+    "advantages": ["职责边界清晰", "易维护", "便于教学和团队分工"],
+    "disadvantages": ["跨层调用可能导致性能损耗", "不适合极端高并发和强实时场景"],
+    "quality_scores": {
+      "concurrency": 2,
+      "realtime": 2,
+      "reliability": 3,
+      "scalability": 3,
+      "deployment_complexity": 2,
+      "data_consistency": 4,
+      "team_collaboration": 3,
+      "maintainability": 5
+    },
+    "topology": {
+      "nodes": [
+        {"id": "UI", "label": "表现层"},
+        {"id": "APP", "label": "应用层"},
+        {"id": "DOMAIN", "label": "领域/业务层"},
+        {"id": "DATA", "label": "数据访问层"},
+        {"id": "DB", "label": "数据库"}
+      ],
+      "edges": [
+        {"from": "UI", "to": "APP", "label": "调用"},
+        {"from": "APP", "to": "DOMAIN", "label": "编排"},
+        {"from": "DOMAIN", "to": "DATA", "label": "读写"},
+        {"from": "DATA", "to": "DB", "label": "SQL"}
+      ]
+    }
+  },
+  {
+    "id": "microservices",
+    "name": "微服务架构",
+    "matching_keywords": ["高并发", "独立部署", "团队", "扩展", "云原生", "视频通话"],
+    "applicable_scenarios": ["大型互联网平台", "多团队并行交付系统", "需要独立扩缩容的复杂业务"],
+    "advantages": ["服务可独立部署", "按业务域扩展", "利于多团队协作"],
+    "disadvantages": ["分布式治理复杂", "运维和可观测性成本较高"],
+    "quality_scores": {
+      "concurrency": 5,
+      "realtime": 3,
+      "reliability": 4,
+      "scalability": 5,
+      "deployment_complexity": 5,
+      "data_consistency": 2,
+      "team_collaboration": 5,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "GW", "label": "API网关"},
+        {"id": "S1", "label": "用户服务"},
+        {"id": "S2", "label": "业务服务"},
+        {"id": "S3", "label": "通知服务"},
+        {"id": "DB1", "label": "服务数据库"}
+      ],
+      "edges": [
+        {"from": "GW", "to": "S1", "label": "路由"},
+        {"from": "GW", "to": "S2", "label": "路由"},
+        {"from": "S2", "to": "S3", "label": "事件/调用"},
+        {"from": "S1", "to": "DB1", "label": "私有数据"},
+        {"from": "S2", "to": "DB1", "label": "私有数据"}
+      ]
+    }
+  },
+  {
+    "id": "event_driven",
+    "name": "事件驱动架构",
+    "matching_keywords": ["实时", "消息", "异步", "高吞吐", "事件", "通知", "即时通讯"],
+    "applicable_scenarios": ["即时通讯", "订单状态流转", "IoT 数据接入", "高吞吐异步处理"],
+    "advantages": ["模块高度解耦", "高吞吐异步处理能力强", "适合实时消息传播"],
+    "disadvantages": ["事件追踪和调试复杂", "最终一致性设计难度较高"],
+    "quality_scores": {
+      "concurrency": 5,
+      "realtime": 5,
+      "reliability": 4,
+      "scalability": 5,
+      "deployment_complexity": 4,
+      "data_consistency": 2,
+      "team_collaboration": 4,
+      "maintainability": 3
+    },
+    "topology": {
+      "nodes": [
+        {"id": "P", "label": "事件生产者"},
+        {"id": "BROKER", "label": "消息代理"},
+        {"id": "C1", "label": "消费者A"},
+        {"id": "C2", "label": "消费者B"},
+        {"id": "STORE", "label": "事件存储"}
+      ],
+      "edges": [
+        {"from": "P", "to": "BROKER", "label": "发布"},
+        {"from": "BROKER", "to": "C1", "label": "订阅"},
+        {"from": "BROKER", "to": "C2", "label": "订阅"},
+        {"from": "BROKER", "to": "STORE", "label": "持久化"}
+      ]
+    }
+  },
+  {
+    "id": "pipe_filter",
+    "name": "管道-过滤器架构",
+    "matching_keywords": ["数据处理", "ETL", "流水线", "日志", "批处理", "高吞吐"],
+    "applicable_scenarios": ["数据清洗", "日志分析", "编译器处理链", "批量转换任务"],
+    "advantages": ["处理步骤清晰", "过滤器可复用", "适合流式和批量数据处理"],
+    "disadvantages": ["交互式业务支持较弱", "跨步骤错误处理需要额外设计"],
+    "quality_scores": {
+      "concurrency": 4,
+      "realtime": 3,
+      "reliability": 3,
+      "scalability": 4,
+      "deployment_complexity": 3,
+      "data_consistency": 3,
+      "team_collaboration": 3,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "IN", "label": "输入流"},
+        {"id": "F1", "label": "过滤器1"},
+        {"id": "F2", "label": "过滤器2"},
+        {"id": "F3", "label": "过滤器3"},
+        {"id": "OUT", "label": "输出结果"}
+      ],
+      "edges": [
+        {"from": "IN", "to": "F1", "label": "管道"},
+        {"from": "F1", "to": "F2", "label": "管道"},
+        {"from": "F2", "to": "F3", "label": "管道"},
+        {"from": "F3", "to": "OUT", "label": "管道"}
+      ]
+    }
+  },
+  {
+    "id": "client_server",
+    "name": "客户端-服务器架构",
+    "matching_keywords": ["客户端", "服务器", "桌面", "移动端", "简单部署"],
+    "applicable_scenarios": ["移动 App 后端", "桌面客户端系统", "简单 Web 服务"],
+    "advantages": ["结构直观", "开发成本低", "适合快速原型"],
+    "disadvantages": ["服务器容易成为瓶颈", "复杂业务扩展能力有限"],
+    "quality_scores": {
+      "concurrency": 3,
+      "realtime": 3,
+      "reliability": 3,
+      "scalability": 2,
+      "deployment_complexity": 2,
+      "data_consistency": 4,
+      "team_collaboration": 2,
+      "maintainability": 3
+    },
+    "topology": {
+      "nodes": [
+        {"id": "C1", "label": "客户端"},
+        {"id": "API", "label": "服务器API"},
+        {"id": "DB", "label": "数据库"}
+      ],
+      "edges": [
+        {"from": "C1", "to": "API", "label": "请求"},
+        {"from": "API", "to": "DB", "label": "读写"}
+      ]
+    }
+  },
+  {
+    "id": "mvc",
+    "name": "MVC架构",
+    "matching_keywords": ["Web", "界面", "表单", "管理系统", "前后端"],
+    "applicable_scenarios": ["Web 管理系统", "表单驱动业务", "中小型交互应用"],
+    "advantages": ["界面、控制和模型分离", "适合快速开发 Web 应用", "学习和维护成本低"],
+    "disadvantages": ["复杂前端状态管理能力有限", "大型系统容易出现控制器膨胀"],
+    "quality_scores": {
+      "concurrency": 2,
+      "realtime": 2,
+      "reliability": 3,
+      "scalability": 3,
+      "deployment_complexity": 2,
+      "data_consistency": 4,
+      "team_collaboration": 3,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "V", "label": "View"},
+        {"id": "C", "label": "Controller"},
+        {"id": "M", "label": "Model"},
+        {"id": "DB", "label": "Database"}
+      ],
+      "edges": [
+        {"from": "V", "to": "C", "label": "交互"},
+        {"from": "C", "to": "M", "label": "调用"},
+        {"from": "M", "to": "DB", "label": "持久化"},
+        {"from": "M", "to": "V", "label": "数据"}
+      ]
+    }
+  },
+  {
+    "id": "repository",
+    "name": "仓库架构",
+    "matching_keywords": ["数据中心", "共享数据", "知识库", "文档", "一致性"],
+    "applicable_scenarios": ["知识库系统", "数据管理平台", "多模块共享数据系统"],
+    "advantages": ["统一数据管理", "数据一致性强", "便于集中审计"],
+    "disadvantages": ["中心仓库可能成为瓶颈", "模块耦合在数据模型上"],
+    "quality_scores": {
+      "concurrency": 3,
+      "realtime": 2,
+      "reliability": 4,
+      "scalability": 3,
+      "deployment_complexity": 3,
+      "data_consistency": 5,
+      "team_collaboration": 3,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "A", "label": "组件A"},
+        {"id": "B", "label": "组件B"},
+        {"id": "R", "label": "中央仓库"},
+        {"id": "C", "label": "组件C"}
+      ],
+      "edges": [
+        {"from": "A", "to": "R", "label": "读写"},
+        {"from": "B", "to": "R", "label": "读写"},
+        {"from": "C", "to": "R", "label": "读写"}
+      ]
+    }
+  },
+  {
+    "id": "soa",
+    "name": "SOA架构",
+    "matching_keywords": ["企业集成", "服务复用", "遗留系统", "业务服务"],
+    "applicable_scenarios": ["企业级系统集成", "跨部门服务复用", "遗留系统改造"],
+    "advantages": ["业务服务复用能力强", "适合企业集成", "治理模型成熟"],
+    "disadvantages": ["服务治理较重", "响应速度依赖服务总线和集成链路"],
+    "quality_scores": {
+      "concurrency": 3,
+      "realtime": 2,
+      "reliability": 4,
+      "scalability": 4,
+      "deployment_complexity": 4,
+      "data_consistency": 4,
+      "team_collaboration": 4,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "PORTAL", "label": "业务门户"},
+        {"id": "ESB", "label": "服务总线"},
+        {"id": "S1", "label": "客户服务"},
+        {"id": "S2", "label": "订单服务"},
+        {"id": "LEGACY", "label": "遗留系统"}
+      ],
+      "edges": [
+        {"from": "PORTAL", "to": "ESB", "label": "服务请求"},
+        {"from": "ESB", "to": "S1", "label": "编排"},
+        {"from": "ESB", "to": "S2", "label": "编排"},
+        {"from": "ESB", "to": "LEGACY", "label": "适配"}
+      ]
+    }
+  },
+  {
+    "id": "microkernel",
+    "name": "微内核架构",
+    "matching_keywords": ["插件", "扩展", "规则", "可插拔", "平台"],
+    "applicable_scenarios": ["插件平台", "IDE", "规则引擎", "产品线系统"],
+    "advantages": ["核心稳定", "扩展能力强", "便于按插件演进功能"],
+    "disadvantages": ["插件协议设计成本高", "插件兼容性管理复杂"],
+    "quality_scores": {
+      "concurrency": 3,
+      "realtime": 2,
+      "reliability": 3,
+      "scalability": 4,
+      "deployment_complexity": 3,
+      "data_consistency": 3,
+      "team_collaboration": 4,
+      "maintainability": 5
+    },
+    "topology": {
+      "nodes": [
+        {"id": "CORE", "label": "核心系统"},
+        {"id": "P1", "label": "插件A"},
+        {"id": "P2", "label": "插件B"},
+        {"id": "P3", "label": "插件C"}
+      ],
+      "edges": [
+        {"from": "CORE", "to": "P1", "label": "扩展点"},
+        {"from": "CORE", "to": "P2", "label": "扩展点"},
+        {"from": "CORE", "to": "P3", "label": "扩展点"}
+      ]
+    }
+  },
+  {
+    "id": "cqrs",
+    "name": "CQRS架构",
+    "matching_keywords": ["读写分离", "查询", "命令", "高并发读", "一致性"],
+    "applicable_scenarios": ["读多写少系统", "复杂查询平台", "需要读写模型独立演进的业务"],
+    "advantages": ["读写模型独立优化", "查询性能好", "适合复杂业务命令校验"],
+    "disadvantages": ["模型同步复杂", "通常需要处理最终一致性"],
+    "quality_scores": {
+      "concurrency": 4,
+      "realtime": 3,
+      "reliability": 4,
+      "scalability": 4,
+      "deployment_complexity": 4,
+      "data_consistency": 3,
+      "team_collaboration": 4,
+      "maintainability": 3
+    },
+    "topology": {
+      "nodes": [
+        {"id": "API", "label": "应用API"},
+        {"id": "CMD", "label": "命令模型"},
+        {"id": "QRY", "label": "查询模型"},
+        {"id": "WDB", "label": "写库"},
+        {"id": "RDB", "label": "读库"}
+      ],
+      "edges": [
+        {"from": "API", "to": "CMD", "label": "写请求"},
+        {"from": "API", "to": "QRY", "label": "读请求"},
+        {"from": "CMD", "to": "WDB", "label": "写入"},
+        {"from": "WDB", "to": "RDB", "label": "同步"},
+        {"from": "QRY", "to": "RDB", "label": "查询"}
+      ]
+    }
+  },
+  {
+    "id": "serverless",
+    "name": "Serverless架构",
+    "matching_keywords": ["无服务器", "弹性", "峰值", "事件触发", "低运维"],
+    "applicable_scenarios": ["事件触发任务", "流量波动明显的业务", "低运维成本原型"],
+    "advantages": ["按需弹性扩缩容", "运维负担低", "适合事件触发场景"],
+    "disadvantages": ["冷启动影响实时性", "平台绑定风险", "复杂长事务支持较弱"],
+    "quality_scores": {
+      "concurrency": 4,
+      "realtime": 3,
+      "reliability": 4,
+      "scalability": 5,
+      "deployment_complexity": 3,
+      "data_consistency": 2,
+      "team_collaboration": 3,
+      "maintainability": 4
+    },
+    "topology": {
+      "nodes": [
+        {"id": "TRIGGER", "label": "事件触发器"},
+        {"id": "FUNC1", "label": "函数A"},
+        {"id": "FUNC2", "label": "函数B"},
+        {"id": "STORE", "label": "托管存储"}
+      ],
+      "edges": [
+        {"from": "TRIGGER", "to": "FUNC1", "label": "触发"},
+        {"from": "TRIGGER", "to": "FUNC2", "label": "触发"},
+        {"from": "FUNC1", "to": "STORE", "label": "读写"},
+        {"from": "FUNC2", "to": "STORE", "label": "读写"}
+      ]
+    }
+  }
+]

@@ -1,0 +1,1 @@
+"""Architecture style assistant application."""

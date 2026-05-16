@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>软件架构风格智能助手</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: false, theme: "default" });
+    window.renderMermaid = async () => {
+      const blocks = document.querySelectorAll(".mermaid");
+      for (const block of blocks) {
+        const code = block.textContent;
+        const id = `m-${Math.random().toString(36).slice(2)}`;
+        const { svg } = await mermaid.render(id, code);
+        block.innerHTML = svg;
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1b2430;
+      --muted: #657083;
+      --line: #d8dee8;
+      --panel: #ffffff;
+      --bg: #f5f7fb;
+      --primary: #1f6feb;
+      --accent: #0f766e;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 { font-size: 22px; margin: 0; }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 18px;
+    }
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    h2 { font-size: 17px; margin: 0 0 12px; }
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      font: inherit;
+      line-height: 1.6;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    button, select {
+      border: 1px solid var(--line);
+      background: #ffffff;
+      border-radius: 6px;
+      min-height: 38px;
+      padding: 0 12px;
+      font: inherit;
+    }
+    button.primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      cursor: pointer;
+    }
+    button:disabled { opacity: .62; cursor: wait; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .candidate {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcff;
+    }
+    .score { color: var(--accent); font-weight: 700; }
+    .muted { color: var(--muted); }
+    .warn { color: var(--warn); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th { background: #eef3fb; }
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      border-radius: 8px;
+      padding: 14px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    .mermaid {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      overflow: auto;
+    }
+    @media (max-width: 860px) {
+      header { align-items: flex-start; flex-direction: column; }
+      main { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>软件架构风格智能助手</h1>
+    <span class="muted">LLM + Agent + 规则引擎</span>
+  </header>
+  <main>
+    <section>
+      <h2>需求输入</h2>
+      <textarea id="requirement">开发一个跨平台的即时通讯系统，要求支持万人同时在线，需要保证消息的实时性和可靠性，后期可能需要快速扩展视频通话功能。</textarea>
+      <div class="actions">
+        <button class="primary" id="recommendBtn">生成架构推荐</button>
+        <select id="examples"></select>
+        <span id="status" class="muted"></span>
+      </div>
+    </section>
+
+    <section id="reportSection" hidden>
+      <h2>最终推荐</h2>
+      <div id="finalReport"></div>
+    </section>
+
+    <section id="featuresSection" hidden>
+      <h2>需求特征</h2>
+      <pre id="features"></pre>
+    </section>
+
+    <section id="candidatesSection" hidden>
+      <h2>候选架构 Top 3</h2>
+      <div id="candidates" class="grid"></div>
+    </section>
+
+    <section id="matrixSection" hidden>
+      <h2>对比矩阵</h2>
+      <div id="matrix"></div>
+    </section>
+
+    <section id="topologySection" hidden>
+      <h2>架构拓扑图</h2>
+      <div id="topology"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const status = $("status");
+    const button = $("recommendBtn");
+    const examples = $("examples");
+
+    async function loadExamples() {
+      const rows = await fetch("/api/examples").then((r) => r.json());
+      examples.innerHTML = rows.map((item) => `<option value="${item.id}">${item.id}. ${item.title}</option>`).join("");
+      examples.addEventListener("change", () => {
+        const item = rows.find((row) => String(row.id) === examples.value);
+        if (item) $("requirement").value = item.requirement;
+      });
+    }
+
+    function list(items) {
+      return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function renderMatrix(rows) {
+      if (!rows.length) return "";
+      const keys = Object.keys(rows[0]);
+      return `<table><thead><tr>${keys.map((k) => `<th>${k}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${keys.map((k) => `<td>${row[k]}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+
+    async function recommend() {
+      button.disabled = true;
+      status.textContent = "正在调用 LLM 并生成推荐...";
+      try {
+        const response = await fetch("/api/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requirement: $("requirement").value })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "请求失败");
+
+        $("reportSection").hidden = false;
+        $("featuresSection").hidden = false;
+        $("candidatesSection").hidden = false;
+        $("matrixSection").hidden = false;
+        $("topologySection").hidden = false;
+
+        $("finalReport").innerHTML = `
+          <p><strong>${escapeHtml(data.final_report.final_recommendation)}</strong></p>
+          <p class="muted">推荐理由</p>${list(data.final_report.recommendation_reason)}
+          <p class="muted">风险应对</p>${list(data.final_report.risk_mitigation)}
+          <p class="muted">决策溯源</p>${list(data.final_report.decision_trace)}
+        `;
+        $("features").textContent = JSON.stringify(data.features, null, 2);
+        $("candidates").innerHTML = data.candidates.map((item) => `
+          <article class="candidate">
+            <h3>${escapeHtml(item.name)}</h3>
+            <p class="score">${item.total_score} / 100 · ${escapeHtml(item.suitability)}</p>
+            <p class="muted">优点</p>${list(item.advantages)}
+            <p class="muted">缺点</p>${list(item.disadvantages)}
+          </article>
+        `).join("");
+        $("matrix").innerHTML = renderMatrix(data.comparison_matrix);
+        $("topology").innerHTML = data.candidates.map((item) => `
+          <h3>${escapeHtml(item.name)}</h3>
+          <pre class="mermaid">${escapeHtml(item.mermaid)}</pre>
+        `).join("");
+        await window.renderMermaid();
+        status.textContent = "推荐完成";
+      } catch (error) {
+        status.innerHTML = `<span class="warn">${escapeHtml(error.message)}</span>`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener("click", recommend);
+    loadExamples();
+  </script>
+</body>
+</html>
