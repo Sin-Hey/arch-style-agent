@@ -47,7 +47,8 @@ def score_style(features: RequirementFeatures, style: dict) -> ArchitectureCandi
         )
 
     keyword_bonus = _keyword_bonus(features, style)
-    total = (weighted_total / weight_sum * 100 if weight_sum else 0) + keyword_bonus
+    semantic_adjustment = _semantic_adjustment(features, style["id"])
+    total = (weighted_total / weight_sum * 100 if weight_sum else 0) + keyword_bonus + semantic_adjustment
     total = max(0, min(100, total))
 
     return ArchitectureCandidate(
@@ -104,6 +105,70 @@ def _keyword_bonus(features: RequirementFeatures, style: dict) -> float:
         if keyword and keyword in text:
             bonus += 2.0
     return min(12.0, bonus)
+
+
+def _semantic_adjustment(features: RequirementFeatures, style_id: str) -> float:
+    text = _feature_text(features)
+    adjustment = 0.0
+
+    plugin_terms = [
+        "插件",
+        "可插拔",
+        "第三方",
+        "独立安装",
+        "卸载",
+        "升级",
+        "语法高亮",
+        "格式化",
+        "调试器",
+        "主题",
+        "扩展点",
+        "扩展平台",
+    ]
+    pipeline_terms = ["日志", "清洗", "过滤", "转换", "聚合", "批处理", "流水线", "高吞吐"]
+
+    if _contains_any(text, plugin_terms):
+        if style_id == "microkernel":
+            adjustment += 18.0
+        elif style_id == "microservices":
+            adjustment -= 14.0
+
+    if _contains_any(text, pipeline_terms):
+        if style_id == "pipe_filter":
+            adjustment += 14.0
+        elif style_id == "microservices":
+            adjustment -= 6.0
+
+    if features.data_consistency >= 4 and features.deployment_complexity <= 2:
+        if style_id in {"layered", "mvc", "repository"}:
+            adjustment += 8.0
+        elif style_id == "microservices":
+            adjustment -= 10.0
+
+    if features.concurrency <= 2 and features.team_collaboration <= 2 and features.deployment_complexity <= 2:
+        if style_id == "microservices":
+            adjustment -= 8.0
+        elif style_id in {"layered", "mvc"}:
+            adjustment += 5.0
+
+    return adjustment
+
+
+def _feature_text(features: RequirementFeatures) -> str:
+    return " ".join(
+        [
+            features.domain,
+            features.data_flow,
+            " ".join(features.core_functions),
+            " ".join(features.quality_attributes),
+            " ".join(features.deployment_constraints),
+            " ".join(features.ambiguity_notes),
+        ]
+    )
+
+
+def _contains_any(text: str, terms: list[str]) -> bool:
+    return any(term in text for term in terms)
 
 
 def _dimension_reason(label: str, demand: float, style_score: float) -> str:

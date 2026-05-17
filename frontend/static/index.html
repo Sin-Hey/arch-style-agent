@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>软件架构风格智能助手</title>
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      securityLevel: "loose",
+      themeVariables: {
+        background: "#ffffff",
+        primaryColor: "#d4e9e2",
+        primaryBorderColor: "#00754A",
+        primaryTextColor: "rgba(0,0,0,0.87)",
+        lineColor: "#1E3932",
+        textColor: "rgba(0,0,0,0.87)",
+        fontFamily: "Inter, Manrope, Helvetica Neue, Microsoft YaHei, Arial"
+      }
+    });
+    window.renderMermaid = async () => {
+      const blocks = document.querySelectorAll(".mermaid[data-rendered='false']");
+      for (const block of blocks) {
+        const code = block.textContent;
+        const id = `m-${Math.random().toString(36).slice(2)}`;
+        const { svg } = await mermaid.render(id, code);
+        block.innerHTML = svg;
+        block.dataset.rendered = "true";
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #006241;
+      --green-accent: #00754A;
+      --green-house: #1E3932;
+      --green-uplift: #2b5148;
+      --green-light: #d4e9e2;
+      --gold: #cba258;
+      --gold-lightest: #faf6ee;
+      --canvas: #f2f0eb;
+      --ceramic: #edebe9;
+      --white: #ffffff;
+      --neutral: #f9f9f9;
+      --text: rgba(0, 0, 0, 0.87);
+      --text-soft: rgba(0, 0, 0, 0.58);
+      --white-soft: rgba(255, 255, 255, 0.70);
+      --line: rgba(0, 0, 0, 0.14);
+      --danger: #c82014;
+      --shadow-card: 0 0 .5px rgba(0,0,0,.14), 0 1px 1px rgba(0,0,0,.24);
+      --shadow-nav: 0 1px 3px rgba(0,0,0,.10), 0 2px 2px rgba(0,0,0,.06), 0 0 2px rgba(0,0,0,.07);
+      --shadow-float: 0 0 6px rgba(0,0,0,.24), 0 8px 12px rgba(0,0,0,.14);
+      --radius-card: 12px;
+      --radius-pill: 50px;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+      --space-5: 32px;
+      --space-6: 40px;
+      --space-7: 48px;
+      --space-9: 64px;
+      --hero-image: url("https://images.pexels.com/photos/6803518/pexels-photo-6803518.jpeg?auto=compress&cs=tinysrgb&w=1400");
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--canvas);
+    }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: Inter, Manrope, "Helvetica Neue", Helvetica, "Microsoft YaHei", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 83px;
+      background: var(--white);
+      box-shadow: var(--shadow-nav);
+    }
+
+    .nav-bar {
+      max-width: 1440px;
+      min-height: 83px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      box-shadow: inset 0 0 0 7px var(--green-accent);
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .brand-subtitle {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .top-links {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .top-links a {
+      color: inherit;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .shell {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      min-height: 560px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr);
+      background:
+        linear-gradient(90deg, var(--canvas) 0%, var(--canvas) 54%, var(--green-light) 54%, var(--green-house) 100%);
+    }
+
+    .hero-copy {
+      padding: var(--space-9) var(--space-6);
+      display: grid;
+      align-content: center;
+      gap: var(--space-4);
+      background: var(--canvas);
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    h1 {
+      max-width: 740px;
+      color: var(--green);
+      font-size: clamp(38px, 5vw, 72px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    .lead {
+      max-width: 620px;
+      color: var(--text);
+      font-size: 19px;
+      line-height: 1.75;
+    }
+
+    .hero-panel {
+      background:
+        linear-gradient(90deg, rgba(242,240,235,.38) 0%, rgba(212,233,226,.28) 7%, rgba(30,57,50,.98) 18%, var(--green-house) 100%);
+      color: var(--white);
+      padding: var(--space-6) var(--space-6) var(--space-6) calc(var(--space-6) + 16px);
+      display: grid;
+      align-content: center;
+      gap: var(--space-4);
+      border-left: 14px solid var(--green-light);
+    }
+
+    .hero-note {
+      max-width: 620px;
+      border-radius: var(--radius-card);
+      background: rgba(30, 57, 50, .92);
+      padding: var(--space-3);
+    }
+
+    .hero-panel h3 {
+      color: var(--green-light);
+    }
+
+    .hero-photo {
+      min-height: 260px;
+      border-radius: var(--radius-card);
+      background: var(--hero-image) center / cover no-repeat;
+      box-shadow: var(--shadow-card);
+    }
+
+    .feature-strip {
+      background:
+        linear-gradient(180deg, var(--green-house) 0%, var(--green-house) 86%, var(--canvas) 100%);
+      color: var(--white);
+      padding: var(--space-5) var(--space-6);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .strip-item {
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: var(--radius-card);
+      padding: var(--space-3);
+      background: rgba(255,255,255,.08);
+    }
+
+    .strip-item strong {
+      display: block;
+      font-size: 24px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .strip-item span {
+      color: var(--white-soft);
+      font-size: 14px;
+    }
+
+    main {
+      display: grid;
+      gap: var(--space-5);
+      padding: var(--space-5) var(--space-6) var(--space-9);
+    }
+
+    .section {
+      background: var(--white);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-4);
+    }
+
+    .section.green {
+      background: var(--green-house);
+      color: var(--white);
+    }
+
+    .section.cream {
+      background: var(--ceramic);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      margin-bottom: var(--space-4);
+    }
+
+    h2 {
+      color: var(--green);
+      font-size: 24px;
+      line-height: 36px;
+      font-weight: 700;
+    }
+
+    .green h2 {
+      color: var(--white);
+    }
+
+    h3 {
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .green h3 {
+      color: var(--white);
+    }
+
+    .section-note {
+      color: var(--text-soft);
+      max-width: 420px;
+      font-size: 14px;
+    }
+
+    .green .section-note {
+      color: var(--white-soft);
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: var(--space-4);
+      align-items: stretch;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 172px;
+      resize: vertical;
+      border: 1px solid rgba(0,0,0,.28);
+      border-radius: 4px;
+      padding: 14px;
+      margin-top: var(--space-3);
+      font: inherit;
+      line-height: 1.75;
+      color: var(--text);
+      background: var(--white);
+    }
+
+    textarea:focus, select:focus, button:focus, summary:focus {
+      outline: 3px solid rgba(0, 117, 74, .18);
+      border-color: var(--green-accent);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    button, select {
+      min-height: 44px;
+      border: 1px solid rgba(0,0,0,.28);
+      border-radius: var(--radius-pill);
+      background: var(--white);
+      color: var(--text);
+      font: inherit;
+      padding: 7px 16px;
+      transition: all .2s ease;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:active {
+      transform: scale(.95);
+    }
+
+    button.primary {
+      border-color: var(--green-accent);
+      background: var(--green-accent);
+      color: var(--white);
+    }
+
+    button.primary:hover {
+      background: var(--green);
+    }
+
+    button:disabled {
+      opacity: .7;
+      cursor: wait;
+    }
+
+    select {
+      min-width: 290px;
+      border-radius: 4px;
+    }
+
+    .status {
+      color: var(--text-soft);
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .status.error { color: var(--danger); }
+    .status.ok { color: var(--green-accent); }
+
+    .side {
+      background: var(--neutral);
+      border-radius: var(--radius-card);
+      padding: var(--space-4);
+      display: grid;
+      align-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--green-light);
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .mini-title {
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .green .mini-title {
+      color: var(--white-soft);
+    }
+
+    .recommendation {
+      font-family: "Iowan Old Style", Georgia, serif;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-top: var(--space-1);
+    }
+
+    .badge-row, .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge, .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--green-light);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .green .badge {
+      border: 1px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+    }
+
+    .content-grid, .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .content-grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .callout, .candidate, .diagram {
+      background: var(--white);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-3);
+    }
+
+    .green .callout {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: none;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      line-height: 1.75;
+    }
+
+    .green ul {
+      color: var(--white);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .metric {
+      border-radius: var(--radius-card);
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+      padding: var(--space-3);
+      min-height: 92px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .metric strong {
+      font-size: 30px;
+      color: var(--green-accent);
+      line-height: 1;
+    }
+
+    .chips {
+      margin-top: var(--space-3);
+    }
+
+    .candidate {
+      display: grid;
+      gap: 12px;
+    }
+
+    .candidate-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .candidate .score {
+      color: var(--green-accent);
+      font-weight: 800;
+    }
+
+    .scorebar {
+      height: 8px;
+      background: var(--ceramic);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .scorebar span {
+      display: block;
+      height: 100%;
+      background: var(--green-accent);
+      width: var(--w);
+    }
+
+    .two-col-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-card);
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+      background: var(--white);
+    }
+
+    th, td {
+      border-bottom: 1px solid rgba(0,0,0,.12);
+      padding: 13px 14px;
+      text-align: left;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+      background: var(--green-light);
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .topology-list {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    .diagram {
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      min-height: 170px;
+      display: grid;
+      place-items: center;
+    }
+
+    details {
+      border-radius: var(--radius-card);
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+      margin-top: var(--space-3);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    pre {
+      margin: 0;
+      max-height: 360px;
+      overflow: auto;
+      padding: var(--space-3);
+      background: var(--green-house);
+      color: var(--white);
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .frap {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 30;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--green-accent);
+      color: var(--white);
+      box-shadow: var(--shadow-float);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      text-decoration: none;
+    }
+
+    .frap:active {
+      transform: scale(.95);
+      box-shadow: 0 0 6px rgba(0,0,0,.24), 0 8px 12px rgba(0,0,0,0);
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 1040px) {
+      .hero, .input-grid, .content-grid, .content-grid.two, .candidate-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-strip, .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .top-links { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-bar {
+        min-height: 72px;
+        padding: 0 var(--space-3);
+      }
+
+      .brand-title { font-size: 17px; }
+      .brand-subtitle { display: none; }
+
+      .hero-copy, .hero-panel, main {
+        padding: var(--space-4) var(--space-3);
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .feature-strip, .metrics, .two-col-list {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: var(--space-3);
+      }
+
+      .section-head {
+        display: grid;
+      }
+
+      select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      button.primary {
+        width: 100%;
+      }
+
+      .frap {
+        width: 48px;
+        height: 48px;
+        right: 16px;
+        bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-bar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <div class="brand-title">软件架构风格智能助手</div>
+          <div class="brand-subtitle">需求理解 · 架构推荐 · 决策溯源</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">LLM + Knowledge Graph + Rule Engine</div>
+        <h1>把模糊需求，转成可解释的软件架构决策。</h1>
+        <p class="lead">输入自然语言需求，系统通过需求解析 Agent、架构匹配 Agent 和评估生成 Agent 输出候选架构、评分矩阵、风险应对、组合方案和 Mermaid 拓扑图。</p>
+        <div class="badge-row">
+          <span class="badge">11 种架构风格</span>
+          <span class="badge">20 条演示案例</span>
+          <span class="badge">真实 DeepSeek API</span>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <div class="hero-photo" role="img" aria-label="团队进行系统设计讨论"></div>
+        <div class="hero-note">
+          <div class="eyebrow" style="color: var(--gold)">Course Demo</div>
+          <h3>面向软件体系结构大作业的系统演示界面</h3>
+          <p style="color: var(--white-soft); margin-top: 8px">温暖米色画布、深绿色功能带、胶囊按钮和轻量卡片，按当前 DESIGN.md 的视觉系统重新设计。</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="feature-strip" aria-label="系统能力概览">
+      <div class="strip-item"><strong>3 个 Agent</strong><span>协同完成需求分析、架构匹配和推荐评估。</span></div>
+      <div class="strip-item"><strong>8 项评分</strong><span>覆盖并发、实时性、可靠性、扩展性、部署复杂度等维度。</span></div>
+      <div class="strip-item"><strong>3 个候选架构</strong><span>输出排序结果、决策依据、评分矩阵和可视化拓扑。</span></div>
+    </section>
+
+    <main>
+      <section class="section" id="inputSection">
+        <div class="input-grid">
+          <div>
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Requirement Input</div>
+                <h2>需求输入</h2>
+              </div>
+            </div>
+            <textarea id="requirement">开发一个跨平台即时通讯系统，要求支持万人同时在线，需要保证消息实时性和可靠性，后期可能扩展视频通话功能。</textarea>
+            <div class="actions">
+              <button class="primary" id="recommendBtn">生成架构推荐</button>
+              <select id="examples" aria-label="测试需求示例"></select>
+              <span id="status" class="status"></span>
+            </div>
+          </div>
+          <aside class="side">
+            <div>
+              <div class="mini-title">推荐流程</div>
+              <ol class="steps">
+                <li><span class="num">1</span><span>需求解析 Agent 提取质量属性和约束。</span></li>
+                <li><span class="num">2</span><span>规则引擎结合知识库进行多维评分。</span></li>
+                <li><span class="num">3</span><span>评估 Agent 生成最终推荐和风险应对。</span></li>
+              </ol>
+            </div>
+            <div class="mini-title">请通过 http://127.0.0.1:8001/ 访问完整系统。</div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section green" id="reportSection" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow" style="color: var(--gold)">Final Recommendation</div>
+            <h2>最终推荐</h2>
+            <div class="recommendation" id="finalName"></div>
+          </div>
+          <div class="badge-row" id="summaryBadges"></div>
+        </div>
+        <div class="content-grid two">
+          <div class="callout">
+            <div class="mini-title">推荐理由</div>
+            <div id="reasonList"></div>
+          </div>
+          <div class="callout">
+            <div class="mini-title">风险应对</div>
+            <div id="riskList"></div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:16px">
+          <div class="mini-title">决策溯源</div>
+          <div id="traceList"></div>
+        </div>
+        <div class="content-grid two" style="margin-top:16px">
+          <div class="callout">
+            <div class="mini-title">组合架构方案</div>
+            <div id="hybridPlan"></div>
+          </div>
+          <div class="callout">
+            <div class="mini-title">质量属性权衡</div>
+            <div id="tradeoffList"></div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top:16px">
+          <div class="mini-title">架构重构建议</div>
+          <div id="refactorList"></div>
+        </div>
+      </section>
+
+      <section class="section cream" id="featuresSection" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Requirement Analysis</div>
+            <h2>需求特征</h2>
+          </div>
+          <p class="section-note">需求解析 Agent 输出的质量属性、功能点、数据流和约束。</p>
+        </div>
+        <div class="metrics" id="metrics"></div>
+        <div class="chips" id="featureChips"></div>
+        <details>
+          <summary>查看结构化需求 JSON</summary>
+          <pre id="featuresRaw"></pre>
+        </details>
+      </section>
+
+      <section class="section" id="candidatesSection" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Candidate Architectures</div>
+            <h2>候选架构 Top 3</h2>
+          </div>
+          <p class="section-note">白色卡片承载候选方案，绿色进度条表达综合适配度。</p>
+        </div>
+        <div id="candidates" class="candidate-grid"></div>
+      </section>
+
+      <section class="section cream" id="matrixSection" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Comparison Matrix</div>
+            <h2>对比矩阵</h2>
+          </div>
+          <p class="section-note">并发、实时性、可靠性、扩展性、部署复杂度等评分横向比较。</p>
+        </div>
+        <div id="matrix" class="table-wrap"></div>
+      </section>
+
+      <section class="section" id="topologySection" hidden>
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Architecture Topology</div>
+            <h2>架构拓扑图</h2>
+          </div>
+          <p class="section-note">使用 Mermaid 渲染候选架构的主要构件和连接关系。</p>
+        </div>
+        <div id="topology" class="topology-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <a class="frap" href="#inputSection" aria-label="返回需求输入">↑</a>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const status = $("status");
+    const button = $("recommendBtn");
+    const examples = $("examples");
+
+    const fallbackExamples = [
+      { id: 1, title: "跨平台即时通讯系统", requirement: "开发一个跨平台即时通讯系统，要求支持万人同时在线，需要保证消息实时性和可靠性，后期可能扩展视频通话功能。" },
+      { id: 2, title: "银行核心账务系统", requirement: "开发一个银行核心账务系统，要求转账、扣款、对账必须强一致，不能出现重复扣款或数据丢失，实时性要求一般，但审计、权限和可靠性要求极高。" },
+      { id: 3, title: "日志分析平台", requirement: "建设一个日志分析平台，每秒接收数十万条日志，需要清洗、过滤、聚合并分发到多个下游系统，允许最终一致，但要求高吞吐、可扩展和失败重试。" },
+      { id: 4, title: "活动报名系统", requirement: "开发一个活动报名系统，平时访问量很低，但活动开始时会突然出现短时间高峰，希望运维成本低，可以自动扩缩容，核心功能是报名、通知和数据导出。" },
+      { id: 5, title: "代码编辑器插件平台", requirement: "开发一个代码编辑器平台，核心功能稳定，但需要支持第三方插件扩展语法高亮、格式化、调试器和主题，要求插件可以独立安装、卸载和升级。" },
+      { id: 6, title: "科研数据共享平台", requirement: "开发一个科研数据共享平台，多个分析工具都要围绕同一份中心数据集进行读写和查询，要求数据集中管理、可追踪、权限控制清晰。" },
+      { id: 7, title: "电商订单查询系统", requirement: "开发一个电商订单查询系统，写入订单时要保证可靠，查询订单列表和统计报表的请求非常多，读请求远高于写请求，希望读写模型可以分别优化。" },
+      { id: 8, title: "课程作业管理系统", requirement: "一个 3 人团队要在 2 周内开发课程作业管理系统，包括登录、作业提交、教师批改和成绩统计，用户量不大，希望结构清晰、开发简单、方便演示。" },
+      { id: 9, title: "大型在线教育平台", requirement: "开发一个大型在线教育平台，包括课程、直播、作业、支付、消息通知、学习记录和推荐系统，由多个团队并行开发，要求服务可以独立部署和扩展。" },
+      { id: 10, title: "工业设备监控系统", requirement: "开发一个工业设备监控与控制系统，需要毫秒级响应传感器数据，异常时立即触发控制指令，可靠性和实时性要求极高，数据分析可以异步完成。" },
+      { id: 11, title: "企业审批报表系统", requirement: "开发企业内部审批和报表系统，用户量中等，要求权限、流程、数据一致性和后期维护方便。" },
+      { id: 12, title: "订单事件处理平台", requirement: "建设订单事件处理平台，需要高吞吐异步处理，多个下游系统订阅，允许最终一致但要能追踪失败消息。" },
+      { id: 13, title: "医院预约挂号平台", requirement: "开发医院预约挂号平台，需要支持患者预约、医生排班、短信通知和支付，要求可靠性高、数据一致性好、后续方便接入更多医院。" },
+      { id: 14, title: "在线考试系统", requirement: "开发在线考试系统，考试开始时会出现短时间并发高峰，需要防作弊、自动交卷、成绩统计和异常恢复。" },
+      { id: 15, title: "IoT 设备接入平台", requirement: "建设物联网设备接入平台，需要接入海量设备上报的数据，支持规则告警、设备状态查询和消息推送。" },
+      { id: 16, title: "内容管理系统", requirement: "开发内容管理系统，支持文章编辑、审核、发布、版本管理和权限控制，团队规模较小，要求易维护。" },
+      { id: 17, title: "支付清结算系统", requirement: "开发支付清结算系统，要求交易可靠、账务强一致、可审计、可追踪，允许部分报表异步生成。" },
+      { id: 18, title: "AI 推理服务平台", requirement: "开发 AI 推理服务平台，需要支持多个模型服务独立部署、按流量扩缩容、记录调用日志，并支持灰度发布。" },
+      { id: 19, title: "校园信息门户", requirement: "开发校园信息门户，包含通知、课表、成绩、选课和个人信息查询，用户量中等，主要要求稳定和易维护。" },
+      { id: 20, title: "矛盾需求测试", requirement: "开发一个系统，既要求所有数据强一致、事务不能失败，又要求跨地域百万并发实时响应，还希望部署简单、成本很低、一个人能长期维护。" }
+    ];
+
+    const metricMap = [
+      ["concurrency", "高并发"],
+      ["realtime", "实时性"],
+      ["reliability", "可靠性"],
+      ["scalability", "扩展性"],
+      ["deployment_complexity", "部署复杂度"],
+      ["data_consistency", "数据一致性"],
+      ["team_collaboration", "团队协作"],
+      ["maintainability", "可维护性"]
+    ];
+
+    async function loadExamples() {
+      let rows = fallbackExamples;
+      try {
+        if (window.location.protocol !== "file:") {
+          const response = await fetch("/api/examples");
+          if (response.ok) rows = await response.json();
+        }
+      } catch {
+        rows = fallbackExamples;
+      }
+      examples.innerHTML = rows.map((item) => `<option value="${item.id}">${item.id}. ${escapeHtml(item.title)}</option>`).join("");
+      examples.addEventListener("change", () => {
+        const item = rows.find((row) => String(row.id) === examples.value);
+        if (item) $("requirement").value = item.requirement;
+      });
+    }
+
+    function list(items) {
+      const safeItems = Array.isArray(items) ? items : [];
+      return `<ul>${safeItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function renderMatrix(rows) {
+      if (!rows.length) return "";
+      const keys = Object.keys(rows[0]);
+      return `<table><thead><tr>${keys.map((k) => `<th>${escapeHtml(k)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${keys.map((k) => `<td>${escapeHtml(row[k])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+
+    function renderMetrics(features) {
+      return metricMap.map(([key, label]) => `
+        <div class="metric">
+          <span>${label}</span>
+          <strong>${features[key] ?? 0}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderFeatureChips(features) {
+      const values = [
+        `领域：${features.domain || "未识别"}`,
+        `数据流：${features.data_flow || "未明确"}`,
+        ...((features.core_functions || []).map((item) => `功能：${item}`)),
+        ...((features.quality_attributes || []).map((item) => `质量：${item}`)),
+        ...((features.deployment_constraints || []).map((item) => `约束：${item}`)),
+        ...((features.ambiguity_notes || []).map((item) => `不确定：${item}`))
+      ];
+      return values.map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("");
+    }
+
+    function renderCandidates(candidates) {
+      return candidates.map((item, index) => `
+        <article class="candidate">
+          <div class="candidate-head">
+            <h3>${index + 1}. ${escapeHtml(item.name)}</h3>
+            <span class="badge">${escapeHtml(item.suitability)}</span>
+          </div>
+          <div class="score">${item.total_score} / 100</div>
+          <div class="scorebar" style="--w:${Math.max(0, Math.min(100, item.total_score))}%"><span></span></div>
+          <div class="two-col-list">
+            <div>
+              <div class="mini-title">优点</div>
+              ${list(item.advantages)}
+            </div>
+            <div>
+              <div class="mini-title">缺点</div>
+              ${list(item.disadvantages)}
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderTopology(candidates) {
+      return candidates.map((item) => `
+        <div class="diagram">
+          <h3>${escapeHtml(item.name)}</h3>
+          <div class="mermaid" data-rendered="false">${escapeHtml(item.mermaid)}</div>
+        </div>
+      `).join("");
+    }
+
+    function showSections() {
+      ["reportSection", "featuresSection", "candidatesSection", "matrixSection", "topologySection"].forEach((id) => {
+        $(id).hidden = false;
+      });
+    }
+
+    async function recommend() {
+      button.disabled = true;
+      status.className = "status";
+      status.textContent = "正在调用 LLM 并生成推荐...";
+      try {
+        if (window.location.protocol === "file:") {
+          throw new Error("请通过 http://127.0.0.1:8001/ 访问完整系统，直接打开 HTML 只能查看示例。");
+        }
+        const response = await fetch("/api/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requirement: $("requirement").value })
+        });
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error(responseText || `HTTP ${response.status}`);
+        }
+        if (!response.ok) throw new Error(data.detail || "请求失败");
+
+        showSections();
+        const top = data.candidates[0];
+        const finalCandidate = data.candidates.find((item) => item.name === data.final_report.final_recommendation) || top;
+        $("finalName").textContent = data.final_report.final_recommendation;
+        $("summaryBadges").innerHTML = `
+          <span class="badge">最终候选：${escapeHtml(finalCandidate.name)}</span>
+          <span class="badge">评分：${finalCandidate.total_score}</span>
+          <span class="badge">${escapeHtml(finalCandidate.suitability)}</span>
+          ${finalCandidate.name !== top.name ? `<span class="badge">规则 Top1：${escapeHtml(top.name)}</span>` : ""}
+        `;
+        $("reasonList").innerHTML = list(data.final_report.recommendation_reason);
+        $("riskList").innerHTML = list(data.final_report.risk_mitigation);
+        $("traceList").innerHTML = list(data.final_report.decision_trace);
+        $("hybridPlan").textContent = data.final_report.hybrid_recommendation || "当前需求可采用单一主架构，无需额外组合。";
+        $("tradeoffList").innerHTML = list(data.final_report.quality_tradeoffs || []);
+        $("refactorList").innerHTML = list(data.final_report.refactoring_plan || []);
+        $("metrics").innerHTML = renderMetrics(data.features);
+        $("featureChips").innerHTML = renderFeatureChips(data.features);
+        $("featuresRaw").textContent = JSON.stringify(data.features, null, 2);
+        $("candidates").innerHTML = renderCandidates(data.candidates);
+        $("matrix").innerHTML = renderMatrix(data.comparison_matrix);
+        $("topology").innerHTML = renderTopology(data.candidates);
+        await window.renderMermaid();
+        status.className = "status ok";
+        status.textContent = "推荐完成";
+        $("reportSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        status.className = "status error";
+        status.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    button.addEventListener("click", recommend);
+    loadExamples();
+  </script>
+</body>
+</html>

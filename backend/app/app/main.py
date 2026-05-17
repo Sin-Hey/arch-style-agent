@@ -34,8 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-STATIC_DIR = ROOT_DIR / "static"
+ROOT_DIR = Path(__file__).resolve().parents[3]
+STATIC_DIR = ROOT_DIR / "frontend" / "static"
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
@@ -51,14 +51,17 @@ def safe_error_detail(exc: Exception) -> str:
 
 @app.get("/")
 async def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "index.html")
+    index_path = STATIC_DIR / "index.html"
+    if not index_path.exists():
+        raise HTTPException(status_code=404, detail=f"Frontend entry not found: {index_path}")
+    return FileResponse(index_path)
 
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon() -> Response:
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-        '<rect width="64" height="64" rx="14" fill="#2563eb"/>'
+        '<rect width="64" height="64" rx="14" fill="#006241"/>'
         '<path d="M22 46 32 16l10 30h-7l-2-7h-8l-2 7h-7Zm5-13h10l-5-15-5 15Z" fill="#fff"/>'
         "</svg>"
     )
