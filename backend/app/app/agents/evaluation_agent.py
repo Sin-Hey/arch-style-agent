@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 
 from app.schemas import ArchitectureCandidate, EvaluationReport, RequirementFeatures
-from app.services.knowledge_base import load_course_knowledge
 from app.services.llm import DeepSeekClient
 
 
@@ -18,8 +17,6 @@ class EvaluationGenerationAgent:
         candidates: list[ArchitectureCandidate],
     ) -> EvaluationReport:
         features_json = json.dumps(features.model_dump(), ensure_ascii=False)
-        course_knowledge = load_course_knowledge()
-        course_summary = json.dumps(course_knowledge["prompt_summary"], ensure_ascii=False)
         candidate_summary = [
             {
                 "name": item.name,
@@ -39,14 +36,14 @@ class EvaluationGenerationAgent:
                 "role": "system",
                 "content": (
                     "你是软件架构评估生成 Agent，负责给出可解释的架构决策报告。"
-                    "请参考课程中的质量属性、SAAM/ATAM、数据流/独立构件/仓库等风格知识。"
+                    "请结合质量属性、架构风格特点与规则引擎评分结果进行分析。"
                     "必须只返回 JSON，不要 Markdown。"
                 ),
             },
             {
                 "role": "user",
                 "content": f"""
-基于需求特征、规则引擎候选结果和课程知识库，生成最终推荐报告。
+基于需求特征和规则引擎候选结果，生成最终推荐报告。
 必须返回 JSON：
 {{
   "final_recommendation": "候选架构名称",
@@ -68,9 +65,6 @@ class EvaluationGenerationAgent:
 
 候选架构：
 {json.dumps(candidate_summary, ensure_ascii=False)}
-
-课程知识库摘要：
-{course_summary}
 """.strip(),
             },
         ]

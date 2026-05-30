@@ -21,12 +21,6 @@ def load_test_cases() -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@lru_cache(maxsize=1)
-def load_course_knowledge() -> dict[str, Any]:
-    path = DATA_DIR / "course_knowledge.json"
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
 def build_knowledge_graph() -> dict[str, list[dict[str, Any]]]:
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
@@ -60,14 +54,5 @@ def build_knowledge_graph() -> dict[str, list[dict[str, Any]]]:
                     "score": score,
                 }
             )
-
-    course = load_course_knowledge()
-    for style_name, course_terms in course.get("style_mapping", {}).items():
-        course_style_id = f"course_style:{style_name}"
-        add_node(course_style_id, style_name, "course_style")
-        for term in course_terms:
-            term_id = f"course_term:{term}"
-            add_node(term_id, term, "course_term")
-            edges.append({"source": course_style_id, "target": term_id, "relation": "explained_by"})
 
     return {"nodes": nodes, "edges": edges}

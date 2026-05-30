@@ -100,7 +100,6 @@ http://127.0.0.1:8001/
 - `GET /api/health`：健康检查
 - `GET /api/styles`：查看架构风格知识库
 - `GET /api/examples`：查看 20 条测试需求
-- `GET /api/course-knowledge`：查看课程知识库摘要
 - `GET /api/knowledge-graph`：查看轻量知识图谱节点和边
 - `GET /api/cache/stats`：查看 LLM 缓存状态
 - `POST /api/analyze`：需求解析
